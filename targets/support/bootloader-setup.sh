@@ -84,15 +84,12 @@ case ${clst_hostarch} in
 	    # GRUB2 Openfirmware
 		kern_subdir=/boot
 		iacfg=$1/boot/grub/grub.cfg
+                mkdir -p $1/boot/grub
 		echo 'set default=0' > ${iacfg}
 		echo 'set gfxpayload=keep' >> ${iacfg}
 		echo 'set timeout=10' >> ${iacfg}
 		echo 'insmod all_video' >> ${iacfg}
 		echo '' >> ${iacfg}
-		for x in ${clst_boot_kernel}
-		do
-		done
-
 		for x in ${clst_boot_kernel}
 		do
 			eval "clst_kernel_console=\$clst_boot_kernel_${x}_console"
@@ -108,26 +105,20 @@ case ${clst_hostarch} in
 			echo "	linux ${kern_subdir}/${x} ${default_append_line} docache" >> ${iacfg}
 			echo "	initrd ${kern_subdir}/${x}.igz" >> ${iacfg}
 			echo "}" >> ${iacfg}
-			echo "" >> ${iacfg}
-
 			if [ -n "${clst_kernel_console}" ]
 			then
+			echo "submenu 'Special console options (kernel: ${x})' --class gnu-linux --class os {" >> ${iacfg}
 				for y in ${clst_kernel_console}
 				do
-					echo ${y}
-                                        echo "menuentry 'Boot LiveCD (kernel: ${x} console=${y})' --class gnu-linux --class os {"  >> ${iacfg}
+					echo "menuentry 'Boot LiveCD (kernel: ${x} console=${y})' --class gnu-linux --class os {"  >> ${iacfg}
 					echo "	linux ${kern_subdir}/${x} ${default_append_line} console=${y}" >> ${iacfg}
 					echo "	initrd ${kern_subdir}/${x}.igz" >> ${iacfg}
 					echo "}" >> ${iacfg}
 					echo "" >> ${iacfg}
-					echo "menuentry 'Boot LiveCD (kernel: ${x} console=${y}) (cached)' --class gnu-linux --class os {"  >> ${iacfg}
-					echo "	linux ${kern_subdir}/${x} ${default_append_line} docache console=${y}" >> ${iacfg}
-					echo "	initrd ${kern_subdir}/${x}.igz" >> ${iacfg}
-					echo "}" >> ${iacfg}
-					echo "" >> ${iacfg}
-
 				done
-                        fi
+				echo "}" >> ${iacfg}
+			fi
+			echo "" >> ${iacfg}
 		done
 	;;
 	sparc*)
